@@ -52,6 +52,9 @@ spec:
         - --metrics-bind-address=:8080
         - --alertmanager-address={{ .Values.alertmanagerAddress }}
         - --alertmanager-authentication={{ .Values.alertmanagerAuthentication }}
+        {{- if .Values.alertmanagerInsecureSkipTLSVerify }}
+        - --alertmanager-insecure-skip-tls-verify=true
+        {{- end }}
         {{ if or .Values.tenancy.enabled .Values.alertmanagerDefaultTenant }}
         - --tenancy-enabled=true
         {{ if .Values.alertmanagerDefaultTenant }}

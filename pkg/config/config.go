@@ -8,10 +8,11 @@ import (
 
 // Config struct holds all the configuration for the operator.
 type Config struct {
-	Address        string
-	Authentication bool
-	BearerToken    string
-	TenantId       string
+	Address               string
+	Authentication        bool
+	BearerToken           string
+	TenantId              string
+	InsecureSkipTLSVerify bool
 
 	// SilenceSelector is used to filter silences based on label selectors.
 	// If nil, the controller will watch all silences.

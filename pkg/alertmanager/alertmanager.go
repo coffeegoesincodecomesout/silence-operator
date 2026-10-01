@@ -2,6 +2,7 @@ package alertmanager
 
 import (
 	"bytes"
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -56,11 +57,20 @@ func New(config config.Config) (*Alertmanager, error) {
 		return nil, errors.Errorf("%T.Address must not be empty", config)
 	}
 
+	httpClient := http.DefaultClient
+	if config.InsecureSkipTLSVerify {
+		httpClient = &http.Client{
+			Transport: &http.Transport{
+				TLSClientConfig: &tls.Config{InsecureSkipVerify: true}, //nolint:gosec
+			},
+		}
+	}
+
 	return &Alertmanager{
 		address:        config.Address,
 		authentication: config.Authentication,
 		token:          config.BearerToken,
-		client:         http.DefaultClient,
+		client:         httpClient,
 		tenantId:       config.TenantId,
 	}, nil
 }
