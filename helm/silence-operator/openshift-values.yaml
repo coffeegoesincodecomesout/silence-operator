@@ -1,0 +1,18 @@
+# Values overlay for installing silence-operator on OpenShift.
+#
+# Usage:
+#   helm install silence-operator . -f openshift-values.yaml -f my-values.yaml
+#
+# This overlay:
+#   - Enables OpenShift-specific resources (anyuid SCC binding, alertmanager RoleBinding)
+#   - Points the operator at the platform alertmanager behind kube-rbac-proxy (port 9094, HTTPS)
+#   - Enables bearer-token authentication (the in-cluster service account token)
+#   - Skips TLS verification (kube-rbac-proxy presents the OpenShift service CA cert;
+#     mount the serving-certs-ca-bundle ConfigMap and set a caFile instead for production)
+
+openshift:
+  enabled: true
+
+alertmanagerAddress: "https://alertmanager-main.openshift-monitoring.svc:9094"
+alertmanagerAuthentication: true
+alertmanagerInsecureSkipTLSVerify: true

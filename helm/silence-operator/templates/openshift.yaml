@@ -18,26 +18,9 @@ subjects:
     name: {{ template "silence-operator.name" . }}
     namespace: {{ template "silence-operator.namespace" . }}
 ---
-# Grant the operator's service account access to the OpenShift alertmanager API.
-# The kube-rbac-proxy in front of the alertmanager performs a SubjectAccessReview
-# checking for alertmanagers/api access in the alertmanager's namespace.
-apiVersion: rbac.authorization.k8s.io/v1
-kind: Role
-metadata:
-  labels:
-    {{- include "labels.common" . | nindent 4 }}
-  name: {{ template "silence-operator.name" . }}-alertmanager-access
-  namespace: {{ .Values.openshift.alertmanagerNamespace }}
-rules:
-  - apiGroups:
-      - monitoring.coreos.com
-    resources:
-      - alertmanagers/api
-    resourceNames:
-      - {{ .Values.openshift.alertmanagerName }}
-    verbs:
-      - "*"
----
+# Bind the operator's service account to CMO's pre-existing monitoring-alertmanager-edit Role.
+# The kube-rbac-proxy in front of the alertmanager performs a SubjectAccessReview against
+# alertmanagers/api in the alertmanager's namespace; CMO ships this Role for exactly that purpose.
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
@@ -48,7 +31,7 @@ metadata:
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
-  name: {{ template "silence-operator.name" . }}-alertmanager-access
+  name: monitoring-alertmanager-edit
 subjects:
   - kind: ServiceAccount
     name: {{ template "silence-operator.name" . }}

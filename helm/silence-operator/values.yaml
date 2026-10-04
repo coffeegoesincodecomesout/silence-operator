@@ -143,8 +143,6 @@ openshift:
   enabled: false
   # Namespace where the cluster alertmanager runs. Override only if using a custom deployment.
   alertmanagerNamespace: openshift-monitoring
-  # Name of the Alertmanager resource the operator should have API access to.
-  alertmanagerName: main
 
 crds:
   # Whether to install the Silence CRD with this chart.
