@@ -13,6 +13,7 @@ type Config struct {
 	BearerToken           string
 	TenantId              string
 	InsecureSkipTLSVerify bool
+	CAFile                string
 
 	// SilenceSelector is used to filter silences based on label selectors.
 	// If nil, the controller will watch all silences.

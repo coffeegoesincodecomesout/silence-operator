@@ -55,6 +55,9 @@ spec:
         {{- if .Values.alertmanagerInsecureSkipTLSVerify }}
         - --alertmanager-insecure-skip-tls-verify=true
         {{- end }}
+        {{- if and .Values.openshift.enabled .Values.openshift.injectServiceCA }}
+        - --alertmanager-ca-file=/etc/ssl/certs/service-ca.crt
+        {{- end }}
         {{ if or .Values.tenancy.enabled .Values.alertmanagerDefaultTenant }}
         - --tenancy-enabled=true
         {{ if .Values.alertmanagerDefaultTenant }}
@@ -96,8 +99,21 @@ spec:
           {{- with .Values.containerSecurityContext }}
             {{- . | toYaml | nindent 10 }}
           {{- end }}
+        {{- if and .Values.openshift.enabled .Values.openshift.injectServiceCA }}
+        volumeMounts:
+        - name: service-ca
+          mountPath: /etc/ssl/certs/service-ca.crt
+          subPath: service-ca.crt
+          readOnly: true
+        {{- end }}
       securityContext:
         {{- with .Values.podSecurityContext }}
           {{- . | toYaml | nindent 8 }}
         {{- end }}
       serviceAccountName: {{ template "silence-operator.name" . }}
+      {{- if and .Values.openshift.enabled .Values.openshift.injectServiceCA }}
+      volumes:
+      - name: service-ca
+        configMap:
+          name: {{ .Values.openshift.caConfigMapName }}
+      {{- end }}

@@ -95,6 +95,7 @@ func main() {
 	flag.StringVar(&cfg.TenantId, "alertmanager-default-tenant-id", "", "Alertmanager tenant id.")
 	flag.BoolVar(&cfg.Authentication, "alertmanager-authentication", false, "Enable Alertmanager authentication using Service Account token.")
 	flag.BoolVar(&cfg.InsecureSkipTLSVerify, "alertmanager-insecure-skip-tls-verify", false, "Skip TLS certificate verification when connecting to Alertmanager. For lab/dev use only.")
+	flag.StringVar(&cfg.CAFile, "alertmanager-ca-file", "", "Path to a CA certificate file for verifying the Alertmanager TLS certificate.")
 	flag.StringVar(&silenceSelector, "silence-selector", "", "Label selector to filter Silence custom resources (e.g., 'environment=production,tier=frontend').")
 	flag.StringVar(&namespaceSelector, "namespace-selector", "", "Label selector to restrict which namespaces the v2 controller watches (e.g., 'environment=production'). If empty, all namespaces are watched.")
 	// Tenancy flags (not wired up yet - for future PRs)

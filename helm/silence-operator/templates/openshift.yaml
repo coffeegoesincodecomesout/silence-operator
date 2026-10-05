@@ -1,18 +1,18 @@
 {{- if .Values.openshift.enabled -}}
 ---
-# Grant the operator's service account permission to use the anyuid SCC.
-# Required because the operator image (distroless nonroot) runs as UID 65534,
-# which falls outside the UID range OpenShift assigns to user namespaces.
+# Grant the operator's service account permission to use the nonroot-v2 SCC (OCP 4.11+).
+# nonroot-v2 allows any fixed non-root UID (including 65534 used by this image) without
+# requiring anyuid, and supports seccompProfile unlike anyuid.
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
   labels:
     {{- include "labels.common" . | nindent 4 }}
-  name: {{ template "silence-operator.name" . }}-anyuid
+  name: {{ template "silence-operator.name" . }}-nonroot-v2
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: system:openshift:scc:anyuid
+  name: system:openshift:scc:nonroot-v2
 subjects:
   - kind: ServiceAccount
     name: {{ template "silence-operator.name" . }}
@@ -36,4 +36,18 @@ subjects:
   - kind: ServiceAccount
     name: {{ template "silence-operator.name" . }}
     namespace: {{ template "silence-operator.namespace" . }}
+{{- if .Values.openshift.injectServiceCA }}
+---
+# OpenShift injects the cluster service CA into this ConfigMap automatically.
+# The operator mounts it to verify the kube-rbac-proxy TLS certificate.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  labels:
+    {{- include "labels.common" . | nindent 4 }}
+  name: {{ .Values.openshift.caConfigMapName }}
+  namespace: {{ template "silence-operator.namespace" . }}
+  annotations:
+    service.beta.openshift.io/inject-cabundle: "true"
+{{- end }}
 {{- end -}}

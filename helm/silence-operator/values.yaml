@@ -53,6 +53,8 @@ namespaceSelector: ""
 podSecurityContext:
   runAsNonRoot: true
   runAsUser: 65534
+  seccompProfile:
+    type: RuntimeDefault
 
 # Configures PodMonitor for silence-operator
 podMonitor:
@@ -138,11 +140,15 @@ rbac:
 # OpenShift-specific configuration
 openshift:
   # Set to true when installing on OpenShift clusters.
-  # Creates the anyuid SCC binding (required because the operator image runs as UID 65534)
-  # and grants access to the OpenShift alertmanager API via kube-rbac-proxy.
+  # Creates the nonroot-v2 SCC binding and grants access to the OpenShift alertmanager API
+  # via kube-rbac-proxy.
   enabled: false
   # Namespace where the cluster alertmanager runs. Override only if using a custom deployment.
   alertmanagerNamespace: openshift-monitoring
+  # When true, creates a ConfigMap annotated for OpenShift service CA injection and mounts it
+  # into the operator pod so TLS verification against kube-rbac-proxy works without skipping verification.
+  injectServiceCA: true
+  caConfigMapName: silence-operator-service-ca
 
 crds:
   # Whether to install the Silence CRD with this chart.

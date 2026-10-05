@@ -3,11 +3,13 @@ package alertmanager
 import (
 	"bytes"
 	"crypto/tls"
+	"crypto/x509"
 	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
 	"net/url"
+	"os"
 	"time"
 
 	"github.com/pkg/errors"
@@ -58,7 +60,22 @@ func New(config config.Config) (*Alertmanager, error) {
 	}
 
 	httpClient := http.DefaultClient
-	if config.InsecureSkipTLSVerify {
+	switch {
+	case config.CAFile != "":
+		caCert, err := os.ReadFile(config.CAFile)
+		if err != nil {
+			return nil, errors.Wrapf(err, "failed to read CA file %q", config.CAFile)
+		}
+		pool := x509.NewCertPool()
+		if !pool.AppendCertsFromPEM(caCert) {
+			return nil, errors.Errorf("CA file %q contains no valid certificates", config.CAFile)
+		}
+		httpClient = &http.Client{
+			Transport: &http.Transport{
+				TLSClientConfig: &tls.Config{RootCAs: pool},
+			},
+		}
+	case config.InsecureSkipTLSVerify:
 		httpClient = &http.Client{
 			Transport: &http.Transport{
 				TLSClientConfig: &tls.Config{InsecureSkipVerify: true}, //nolint:gosec
